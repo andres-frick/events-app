@@ -11,6 +11,7 @@ type User struct {
 	Password string  `gorm:"password"`
 	Rol      string  `gorm:"rol"`
 	Hash     *string `gorm:"hash"`
+	Events   []Event `gorm:"many2many:user_event"`
 }
 
 func (u *User) BeforeSave(tx *gorm.DB) error {
