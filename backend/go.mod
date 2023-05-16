@@ -2,7 +2,10 @@ module events-app
 
 go 1.20
 
-require gorm.io/gorm v1.25.1
+require (
+	github.com/google/uuid v1.3.0
+	gorm.io/gorm v1.25.1
+)
 
 require (
 	github.com/bytedance/sonic v1.8.0 // indirect

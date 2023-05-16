@@ -1,7 +1,9 @@
 package main
 
 import (
+	"events-app/controller"
 	"events-app/database"
+	"events-app/middleware"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -20,9 +22,9 @@ func main() {
 
 	r := gin.Default()
 
-	r.POST("/user/login", ToImplement)
+	r.POST("/user/login", controller.Login)
 
-	//TODO: Middleware to check if user is logged in
+	r.Use(middleware.Auth)
 
 	r.GET("/event", ToImplement)
 	r.GET("/event/:id", ToImplement)
@@ -30,7 +32,7 @@ func main() {
 	r.POST("/event", ToImplement)
 	r.PUT("/event/:id", ToImplement)
 
-	r.Run()
+	r.Run("0.0.0.0:4000")
 }
 
 func ToImplement(c *gin.Context) {

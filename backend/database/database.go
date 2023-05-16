@@ -1,7 +1,7 @@
 package database
 
 import (
-	"events-app/models"
+	"events-app/model"
 	"time"
 
 	"gorm.io/driver/sqlite"
@@ -20,13 +20,13 @@ func StartConnection() {
 }
 
 func Migrate() {
-	DB.AutoMigrate(&models.Event{})
-	DB.AutoMigrate(&models.User{})
+	DB.AutoMigrate(&model.Event{})
+	DB.AutoMigrate(&model.User{})
 	Populate()
 }
 
 func Populate() {
-	event1 := &models.Event{
+	event1 := &model.Event{
 		Title:            "Conferencia de tecnología",
 		ShortDescription: "Conferencia Tecnologia",
 		LongDescription:  "Una conferencia sobre las últimas tendencias en tecnología",
@@ -35,7 +35,7 @@ func Populate() {
 		Location:         "Centro de convenciones",
 		State:            "publicada",
 	}
-	event2 := &models.Event{
+	event2 := &model.Event{
 		Title:            "Taller de desarrollo de aplicaciones móviles",
 		ShortDescription: "Conferencia Desarrollo",
 		LongDescription:  "Un taller práctico sobre cómo desarrollar aplicaciones móviles",
@@ -44,7 +44,7 @@ func Populate() {
 		Location:         "Oficinas de MDA",
 		State:            "publicada",
 	}
-	event3 := &models.Event{
+	event3 := &model.Event{
 		Title:            "Reunión de planificación",
 		ShortDescription: "Conferencia Proyectos",
 		LongDescription:  "Una reunión para planificar el próximo proyecto",
@@ -57,14 +57,14 @@ func Populate() {
 	DB.Create(&event2)
 	DB.Create(&event3)
 
-	admin := &models.User{
+	admin := &model.User{
 		Username: "admin",
 		Password: "admin",
 		Rol:      "admin",
 		Hash:     nil,
 	}
 
-	user := &models.User{
+	user := &model.User{
 		Username: "Juan",
 		Password: "123",
 		Rol:      "user",
