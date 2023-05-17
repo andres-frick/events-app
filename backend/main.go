@@ -26,17 +26,13 @@ func main() {
 
 	r.Use(middleware.Auth)
 
-	r.GET("/event", ToImplement)
-	r.GET("/event/:id", ToImplement)
-	r.GET("/event/:id/register", ToImplement)
-	r.POST("/event", ToImplement)
-	r.PUT("/event/:id", ToImplement)
+	r.GET("/event", controller.GetEventList)
+	r.GET("/event/:id", controller.GetEvent)
+	r.POST("/event", controller.CreateEvent)
+	r.PUT("/event/:id", controller.UpdateEvent)
+	r.DELETE("/event/:id", controller.DeleteEvent)
+	r.POST("/event/:id/register", controller.RegisterEvent)
+	r.GET("/event/registrations", controller.RegisterEventList)
 
 	r.Run("0.0.0.0:4000")
-}
-
-func ToImplement(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"message": "To Implement",
-	})
 }
