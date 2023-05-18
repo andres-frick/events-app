@@ -1,0 +1,7 @@
+FROM golang:1.20.4-alpine AS backend
+RUN apk update && apk add --no-cache sqlite build-base
+WORKDIR /backend
+COPY . .
+RUN CGO_ENABLED=1 go build -o backend .
+EXPOSE 4000
+CMD ["/backend/backend"]

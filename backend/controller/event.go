@@ -5,21 +5,56 @@ import (
 	"events-app/model"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
+type EventFilter struct {
+	Title     *string    `form:"title"`
+	StartDate *time.Time `form:"start"`
+	EndDate   *time.Time `form:"end"`
+	State     *string    `form:"state"`
+}
+
 func GetEventList(c *gin.Context) {
 	user := c.MustGet("user").(model.User)
 
+	var filters EventFilter
+	c.ShouldBind(&filters)
+
+	var fields = []string{}
+	var value = []any{}
+
+	if filters.Title != nil {
+		fields = append(fields, "title LIKE ?")
+		value = append(value, "%"+*filters.Title+"%")
+	}
+
+	if filters.State != nil {
+		fields = append(fields, "state = ?")
+
+		if user.Rol != "admin" {
+			value = append(value, "publicada")
+		} else {
+			value = append(value, *filters.State)
+		}
+	}
+
+	if filters.State == nil && user.Rol != "admin" {
+		fields = append(fields, "state = ?")
+		value = append(value, "publicada")
+	}
+
+	if filters.StartDate != nil && filters.EndDate != nil && filters.StartDate.Before(*filters.EndDate) {
+		fields = append(fields, "event_date BETWEEN ? AND ?")
+		value = append(value, *filters.StartDate, *filters.EndDate)
+	}
+
 	var events []model.Event
 
-	if user.Rol == "admin" {
-		database.DB.Find(&events)
-	} else {
-		database.DB.Where("state = ?", "publicada").Find(&events)
-	}
+	database.DB.Where(strings.Join(fields, " and "), value...).Debug().Find(&events)
 
 	c.JSON(http.StatusOK, events)
 }
@@ -44,7 +79,7 @@ func CreateEvent(c *gin.Context) {
 	}
 
 	var event model.Event
-
+	log.Println(event)
 	if err := c.ShouldBindJSON(&event); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -52,7 +87,7 @@ func CreateEvent(c *gin.Context) {
 
 	database.DB.Create(&event)
 
-	c.JSON(http.StatusOK, event)
+	c.Status(http.StatusCreated)
 }
 
 func UpdateEvent(c *gin.Context) {
@@ -77,7 +112,7 @@ func UpdateEvent(c *gin.Context) {
 
 	database.DB.Save(&event)
 
-	c.JSON(http.StatusOK, event)
+	c.Status(http.StatusOK)
 }
 
 func DeleteEvent(c *gin.Context) {
@@ -132,5 +167,22 @@ func RegisterEventList(c *gin.Context) {
 
 	database.DB.Model(&user).Association("Events").Find(&events)
 
-	c.JSON(http.StatusOK, events)
+	var filterByStatus = c.Query("status")
+	var eventsFilter = []model.Event{}
+	var now = time.Now()
+
+	for _, event := range events {
+		var active = event.EventDate.After(now)
+
+		switch {
+		case filterByStatus == "active" && active:
+			eventsFilter = append(eventsFilter, event)
+		case filterByStatus == "completed" && !active:
+			eventsFilter = append(eventsFilter, event)
+		case filterByStatus == "":
+			eventsFilter = append(eventsFilter, event)
+		}
+	}
+
+	c.JSON(http.StatusOK, eventsFilter)
 }

@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	_ "gorm.io/driver/sqlite"
 )
 
 func main() {
@@ -21,6 +22,8 @@ func main() {
 	}
 
 	r := gin.Default()
+
+	r.Use(middleware.CORSMiddleware)
 
 	r.POST("/user/login", controller.Login)
 

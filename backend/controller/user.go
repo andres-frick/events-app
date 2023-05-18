@@ -38,6 +38,6 @@ func Login(c *gin.Context) {
 
 	database.DB.Model(&user).Update("hash", hash)
 
-	c.JSON(http.StatusOK, gin.H{"message": "Login successful", "hash": hash})
+	c.JSON(http.StatusOK, gin.H{"message": "Login successful", "hash": hash, "rol": user.Rol})
 
 }
